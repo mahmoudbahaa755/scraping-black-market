@@ -1,9 +1,8 @@
-from flask import Flask, request
+from flask import Flask, jsonify,request
 from flask_restful import Api, Resource
-import jsonify
 import pandas as pd
 from scrapping_functions import scrape_currency_options ,get_dict_data,scrape_gold_website,boost,get_asset_data
-
+from get_news import get_html,get_page
 import requests
 from bs4 import BeautifulSoup
 import concurrent.futures
@@ -19,11 +18,8 @@ def scrape_currency_data(url="https://dollaregypt.com",options="currency"):
         soup = BeautifulSoup(response.content, "html.parser")
         
         # Find the relevant data on the webpage
-        title = soup.find('select', id=options)
-        # gold = soup.find('select', id='gold-karat')
-       
+        title = soup.find('select', id=options)       
         options = title.find_all('option')
-        # gold_data=get_dict_data(gold)
         data=get_dict_data(options)
          
         return data
@@ -60,6 +56,14 @@ def process_results(tickers, results):
 # Use the function like this:
 # processed_results = process_results(tickers, results)
 
+@app.route('/get_article', methods=['POST'])
+def get_article():
+    link = request.get_json()
+    link = link.get('link')
+    url = "https://www.ajnet.me/"
+    return jsonify(get_page(url+link))
+
+
 @app.route('/currency_black_market', methods=['GET'])
 def get_currency_data():
     url = "https://dollaregypt.com"
@@ -75,6 +79,33 @@ def get_currency_data():
         return currency_data
     else:
         return jsonify({'error': 'Failed to retrieve currency data'}), 500
+
+@app.route('/get_phalstine_news',methods=['GET'])
+def get_phalstine_news():
+    x=get_html("https://www.ajnet.me/where/arab/palestine")
+    print('---'*40)
+    print(x)
+    print('---'*40)
+    res= {
+        "data":x,
+        "status":200,
+        "message":"success"
+    }
+    return jsonify(res)
+
+@app.route('/get_news',methods=['GET'])
+def get_news():
+    politics=get_html("https://www.ajnet.me/politics/")
+    ebusiness=get_html("https://www.ajnet.me/ebusiness/")
+    print('---'*40)
+    print('---'*40)
+    res= {
+        "data":politics+ebusiness,
+        "status":200,
+        "message":"success"
+    }
+    return jsonify(res)
+
 
 @app.route('/gold_price', methods=['GET'])
 def get_gold_data():
@@ -101,4 +132,4 @@ class ClassificationAPI(Resource):
       
 api.add_resource(ClassificationAPI, "/get_coins_price", methods=["GET"])
 if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0", port=5400)
+    app.run(debug=True, host="0.0.0.0", port=5400)
