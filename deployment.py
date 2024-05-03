@@ -43,6 +43,7 @@ def get_crypto_data():
     results = [future.result() for future in futures]
     print(results[0]['high'])
     return process_results(tickers, results)
+
 def process_results(tickers, results):
     return [{tickers[i][0]: {
         "high": results[i]['high'].iloc[-1],
@@ -53,8 +54,7 @@ def process_results(tickers, results):
         
     }} for i in range(len(results))]
 
-# Use the function like this:
-# processed_results = process_results(tickers, results)
+
 
 @app.route('/get_article', methods=['POST'])
 def get_article():
