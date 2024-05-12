@@ -1,18 +1,21 @@
-from flask import Flask, jsonify,request
-from flask_restful import Api, Resource
-import pandas as pd
-from scrapping_functions import scrape_currency_options ,get_dict_data,scrape_gold_website,boost,get_asset_data
-from get_news import get_html,get_page
+from fastapi import FastAPI 
+from pydantic import BaseModel
+import concurrent.futures
+from scrapping_functions import scrape_currency_options, get_dict_data, scrape_gold_website,  get_asset_data
+from get_news import get_html, get_page
 import requests
 from bs4 import BeautifulSoup
-import concurrent.futures
-from fastapi import FastAPI ,requests
-    
-def scrape_currency_data(url="https://dollaregypt.com",options="currency"):
-    # Send a GET request to the URL
-    response = requests.get(url)
 
-    # Check if the request was successful
+
+app = FastAPI()
+
+class Link(BaseModel):
+    link: str
+
+app.get("/get_coins_price")
+def scrape_currency_data(url="https://dollaregypt.com",options="currency"):
+
+    response = requests.get(url)
     if response.status_code == 200:
         # Parse the HTML content
         soup = BeautifulSoup(response.content, "html.parser")
@@ -27,13 +30,12 @@ def scrape_currency_data(url="https://dollaregypt.com",options="currency"):
         print("Failed to retrieve the webpage. Status code:", response.status_code)
         return None
 
-app = Flask(__name__)
-api = Api(app)
+ 
 
 def get_last_row(df):
     return df.iloc[-1, :]
 
-@app.route('/get_crypto_data', methods=['GET'])
+@app.get('/get_crypto_data')
 def get_crypto_data():
     tickers = [["ETHUSDT"], [ "XRPUSDT"], [ "BTCUSDT"]]
 
@@ -54,17 +56,16 @@ def process_results(tickers, results):
         
     }} for i in range(len(results))]
 
+class Article(BaseModel):
+    link: str
 
 
-@app.route('/get_article', methods=['POST'])
-def get_article():
-    link = request.get_json()
-    link = link.get('link')
+@app.post('/get_article')
+async def get_article(article: Article):
     url = "https://www.ajnet.me/"
-    return jsonify(get_page(url+link))
+    return get_page(url + article.link)
 
-
-@app.route('/currency_black_market', methods=['GET'])
+@app.get('/currency_black_market')
 def get_currency_data():
     url = "https://dollaregypt.com"
     i=0
@@ -78,9 +79,9 @@ def get_currency_data():
     if currency_data:
         return currency_data
     else:
-        return jsonify({'error': 'Failed to retrieve currency data'}), 500
+        return ({'error': 'Failed to retrieve currency data'}), 500
 
-@app.route('/get_phalstine_news',methods=['GET'])
+@app.get('/get_phalstine_news')
 def get_phalstine_news():
     x=get_html("https://www.ajnet.me/where/arab/palestine")
     print('---'*40)
@@ -91,9 +92,11 @@ def get_phalstine_news():
         "status":200,
         "message":"success"
     }
-    return jsonify(res)
-
-@app.route('/get_news',methods=['GET'])
+    return (res)
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+@app.get('/get_news')
 def get_news():
     politics=get_html("https://www.ajnet.me/politics/")
     ebusiness=get_html("https://www.ajnet.me/ebusiness/")
@@ -104,10 +107,14 @@ def get_news():
         "status":200,
         "message":"success"
     }
-    return jsonify(res)
+    return (res)
 
 
-@app.route('/gold_price', methods=['GET'])
+@app.get('/gold_price',
+         tags=["Gold Price"],
+         response_description='Get the current gold price in Egypt',
+         
+         )
 def get_gold_data():
     url = "https://www.dollaregypt.com/gold-price/"
     i=0
@@ -121,15 +128,5 @@ def get_gold_data():
     if gold_data:
         return gold_data
     else:
-        return jsonify({'error': 'Failed to retrieve gold data'}), 500
-class ClassificationAPI(Resource):
-        def get(self):
-            # data=scrape_currency_data()
-            gold_data=scrape_currency_data('https://www.dollaregypt.com/gold-price/',"gold-karat")
-            # print(data)
-            return {'gold_data':gold_data,'status':200,'message':'success',}
+        return ({'error': 'Failed to retrieve gold data'}), 500
 
-      
-api.add_resource(ClassificationAPI, "/get_coins_price", methods=["GET"])
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5400)
