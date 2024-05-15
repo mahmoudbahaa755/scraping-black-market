@@ -1,0 +1,9 @@
+version: '2'
+services:
+  core_api:
+    build: .
+    ports:
+      - "8000:15400"
+    volumes:
+      - ./app/:/app
+     
