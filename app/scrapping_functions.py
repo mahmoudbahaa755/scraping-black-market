@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 
 import threading
 
-import binance.client
 from binance.client import Client
 import datetime as dt
 import pandas as pd

@@ -1,8 +1,5 @@
-from selenium import webdriver
 from bs4 import BeautifulSoup
-from lxml import html
 import requests
-import json
 
 
 base_url = "https://www.ajnet.me"

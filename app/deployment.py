@@ -1,6 +1,5 @@
 from flask import Flask, jsonify,request
 from flask_restful import Api, Resource
-import pandas as pd
 from app.scrapping_functions import scrape_currency_options ,get_dict_data,scrape_gold_website,boost,get_asset_data
 from app.get_news import get_html,get_page
 import requests
