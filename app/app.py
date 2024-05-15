@@ -7,7 +7,13 @@ from bs4 import BeautifulSoup
 
 
 app = FastAPI()
+@app.get("/")
+def read_root_get():
+    return {"Hello": "World"}
 
+@app.head("/")
+def read_root_head():
+    return {}
 class Link(BaseModel):
     link: str
 
