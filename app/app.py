@@ -1,7 +1,7 @@
 from fastapi import FastAPI 
 from pydantic import BaseModel
 import concurrent.futures
-from scrapping_functions import scrape_currency_options, get_dict_data, scrape_gold_website,  get_asset_data
+from app.scrapping_functions import scrape_currency_options, get_dict_data, scrape_gold_website,  get_asset_data
 from app.get_news import get_html, get_page
 import requests
 from bs4 import BeautifulSoup
