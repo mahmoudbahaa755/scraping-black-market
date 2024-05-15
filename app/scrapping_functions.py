@@ -35,67 +35,68 @@
 #     for thrd in thread_list:
 #         thrd.join()
 #     return thread_list
+import requests
+from bs4 import BeautifulSoup
+def scrape_currency_options(url):
+    data=[]
+    response = requests.get(url)
 
-# def scrape_currency_options(url):
-#     data=[]
-#     response = requests.get(url)
-
-#     if response.status_code == 200:
-#         soup = BeautifulSoup(response.content, "html.parser")
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content, "html.parser")
         
-#         title = soup.find('select', id='currency')
+        title = soup.find('select', id='currency')
        
-#         options = title.find_all('option')
-#         return get_dict_data(options)
+        options = title.find_all('option')
+        return get_dict_data(options)
        
-#     else:
-#         print("Failed to retrieve the webpage. Status code:", response.status_code)
-#         return -1
+    else:
+        print("Failed to retrieve the webpage. Status code:", response.status_code)
+        return -1
     
-# def get_dict_data(data):
+def get_dict_data(data):
 
     
-#     scraped_data=[]
-#     for i in data:
-#          key_id=i['data-id']
-#          value=i['value']
-#          scraped_data.append({key_id:value})
+    scraped_data=[]
+    for i in data:
+         key_id=i['data-id']
+         value=i['value']
+         scraped_data.append({key_id:value})
 
-#     return scraped_data
+    return scraped_data
 
 
 
-# def scrape_gold_website(url="https://www.dollaregypt.com/gold-price/"):
-#     response = requests.get(url)
+def scrape_gold_website(url="https://www.dollaregypt.com/gold-price/"):
+    response = requests.get(url)
 
-#     if response.status_code == 200:
-#         # Parse the HTML content
-#         soup = BeautifulSoup(response.content, "html.parser")
+    if response.status_code == 200:
+        # Parse the HTML content
+        soup = BeautifulSoup(response.content, "html.parser")
 
-#         title = soup.find_all('table', class_='table table-striped table-hover tablesorter mt-3')
+        title = soup.find_all('table', class_='table table-striped table-hover tablesorter mt-3')
 
-#         data = {}
+        data = {}
 
-#         for table in title:
-#             rows = table.find_all('tr')
-#             for row in rows:
-#                 cells = row.find_all('td')
+        for table in title:
+            rows = table.find_all('tr')
+            for row in rows:
+                cells = row.find_all('td')
 
-#                 if cells:  # Check if the row has cells
-#                     key = cells[0].text.strip()  # The first cell is the key
-#                     buy_price = cells[1].find('span', class_='rate buy h3').text.strip()
-#                     sell_price = cells[2].find('span', class_='rate buy h3').text.strip()
-#                     last_buy_price= cells[1].find('div', class_='change small').text.strip()
-#                     last_sell_price= cells[2].find('div', class_='change small').text.strip()
-#                     data[key] = {'buy_price_change': buy_price,
-#                                  'last_sell_price': last_sell_price,
-#                                  'sell_price_change': sell_price,
-#                                  'last_buy_price':last_buy_price}
-#             if data.keys():
-#                 break
+                if cells:  # Check if the row has cells
+                    key = cells[0].text.strip()  # The first cell is the key
+                    buy_price = cells[1].find('span', class_='rate buy h3').text.strip()
+                    sell_price = cells[2].find('span', class_='rate buy h3').text.strip()
+                    last_buy_price= cells[1].find('div', class_='change small').text.strip()
+                    last_sell_price= cells[2].find('div', class_='change small').text.strip()
+                    data[key] = {'buy_price_change': buy_price,
+                                 'last_sell_price': last_sell_price,
+                                 'sell_price_change': sell_price,
+                                 'last_buy_price':last_buy_price}
+            if data.keys():
+                break
 
-#         return data
+        return data
 
-#     else:
-#         print("Failed to retrieve the webpage. Status code:", response.status_code)
-#         return None
+    else:
+        print("Failed to retrieve the webpage. Status code:", response.status_code)
+        return None
