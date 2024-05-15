@@ -1,7 +1,6 @@
 from fastapi import FastAPI 
 from pydantic import BaseModel
-import concurrent.futures
-from scrapping_functions import scrape_currency_options, get_dict_data, scrape_gold_website,  get_asset_data
+from scrapping_functions import scrape_currency_options, get_dict_data, scrape_gold_website
 from get_news import get_html, get_page
 import requests
 from bs4 import BeautifulSoup
@@ -27,7 +26,6 @@ def scrape_currency_data(url="https://dollaregypt.com",options="currency"):
          
         return data
     else:
-        print("Failed to retrieve the webpage. Status code:", response.status_code)
         return None
 
  
@@ -35,16 +33,15 @@ def scrape_currency_data(url="https://dollaregypt.com",options="currency"):
 def get_last_row(df):
     return df.iloc[-1, :]
 
-@app.get('/get_crypto_data')
-def get_crypto_data():
-    tickers = [["ETHUSDT"], [ "XRPUSDT"], [ "BTCUSDT"]]
+# @app.get('/get_crypto_data')
+# def get_crypto_data():
+#     tickers = [["ETHUSDT"], [ "XRPUSDT"], [ "BTCUSDT"]]
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(get_asset_data, ticker, "4h", "24 hours ago UTC+1") for ticker in tickers]
+#     with concurrent.futures.ThreadPoolExecutor() as executor:
+#         futures = [executor.submit(get_asset_data, ticker, "4h", "24 hours ago UTC+1") for ticker in tickers]
     
-    results = [future.result() for future in futures]
-    print(results[0]['high'])
-    return process_results(tickers, results)
+#     results = [future.result() for future in futures]
+#     return process_results(tickers, results)
 
 def process_results(tickers, results):
     return [{tickers[i][0]: {
@@ -84,9 +81,6 @@ def get_currency_data():
 @app.get('/get_phalstine_news')
 def get_phalstine_news():
     x=get_html("https://www.ajnet.me/where/arab/palestine")
-    print('---'*40)
-    print(x)
-    print('---'*40)
     res= {
         "data":x,
         "status":200,
@@ -100,8 +94,6 @@ def read_root():
 def get_news():
     politics=get_html("https://www.ajnet.me/politics/")
     ebusiness=get_html("https://www.ajnet.me/ebusiness/")
-    print('---'*40)
-    print('---'*40)
     res= {
         "data":politics+ebusiness,
         "status":200,
