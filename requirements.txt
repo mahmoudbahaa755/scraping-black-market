@@ -3,3 +3,5 @@
 fastapi
 uvicorn 
 requests
+lxml_html_clean
+requests-html
