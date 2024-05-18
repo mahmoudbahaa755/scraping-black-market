@@ -4,6 +4,8 @@ from scrapping_functions import scrape_currency_options, get_dict_data, scrape_g
 from get_news import get_html, get_page
 import requests
 from bs4 import BeautifulSoup
+from currency_exchange import get_exchange_rate
+from classes import CurrencyExchange,Link,Article
 
 
 app = FastAPI()
@@ -14,10 +16,10 @@ def read_root_get():
 @app.head("/")
 def read_root_head():
     return {}
-class Link(BaseModel):
-    link: str
 
-app.get("/get_coins_price")
+
+@app.get("/get_coins_price",
+         tags=["Price"],)
 def scrape_currency_data(url="https://dollaregypt.com",options="currency"):
 
     response = requests.get(url)
@@ -59,16 +61,17 @@ def process_results(tickers, results):
         
     }} for i in range(len(results))]
 
-class Article(BaseModel):
-    link: str
 
 
-@app.post('/get_article')
+
+@app.post('/get_article',
+          tags=["News"],)
 async def get_article(article: Article):
     url = "https://www.ajnet.me/"
     return get_page(url + article.link)
 
-@app.get('/currency_black_market')
+@app.get('/currency_black_market',
+         tags=["Price"],)
 def get_currency_data():
     url = "https://dollaregypt.com"
     i=0
@@ -84,7 +87,8 @@ def get_currency_data():
     else:
         return ({'error': 'Failed to retrieve currency data'}), 500
 
-@app.get('/get_phalstine_news')
+@app.get('/get_phalstine_news',
+         tags=["News"],)
 def get_phalstine_news():
     x=get_html("https://www.ajnet.me/where/arab/palestine")
     res= {
@@ -96,7 +100,8 @@ def get_phalstine_news():
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
-@app.get('/get_news')
+@app.get('/get_news',
+         tags=["News"],)
 def get_news():
     politics=get_html("https://www.ajnet.me/politics/")
     ebusiness=get_html("https://www.ajnet.me/ebusiness/")
@@ -108,8 +113,16 @@ def get_news():
     return (res)
 
 
+@app.post('/currency_exchange',
+          tags=["Price"],)
+def post_currency_exchange(data: CurrencyExchange):
+    res=get_exchange_rate(from_currency=data.from_currency, to_currency=data.to_currency, amount=data.amount)
+    return {
+        
+        "exchange":res}
+
 @app.get('/gold_price',
-         tags=["Gold Price"],
+         tags=["Price"],
          response_description='Get the current gold price in Egypt',
          
          )
